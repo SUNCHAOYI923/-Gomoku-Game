@@ -1,4 +1,5 @@
-module org.gomoku_game {
+module org.gomoku_game
+{
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -10,6 +11,7 @@ module org.gomoku_game {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires java.desktop;
 
     opens org.gomoku_game to javafx.fxml;
     exports org.gomoku_game;
