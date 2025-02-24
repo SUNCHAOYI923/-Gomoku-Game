@@ -7,26 +7,19 @@ import javafx.scene.shape.Circle;
 
 public class Board extends Pane
 {
-    private Canvas canvas;
+    public Canvas canvas;
     private Circle circle;
-    private GraphicsContext pencil;
+    public GraphicsContext pencil;
     private Gomoku gomoku;
-
-    public Board (Gomoku gomoku)
-    {
-        this.gomoku = gomoku;
-        draw_pane (Constant.sz);draw_chess(Constant.sz);
-        getChildren ().add (canvas);
-    }
     private void draw_cir (double x,double y)
     {
         double r = 3;
         circle = new Circle (Constant.board_del + x,Constant.board_del + y,r);
         getChildren ().add (circle);
     }
-    private void draw_pane (double del)
+    public void draw_pane (double del)
     {
-        canvas = new Canvas (Constant.height,Constant.width);
+        canvas = new Canvas (Constant.width,Constant.height);
         pencil = canvas.getGraphicsContext2D ();
         pencil.clearRect (0,0,Constant.LEN,Constant.LEN);pencil.setStroke (Color.BLACK);
         for (int i = 0;i < Constant.LEN - 1;++i)
@@ -50,17 +43,44 @@ public class Board extends Pane
             for (int j = 0;j < Constant.LEN;++j)
             {
                 double dx = Constant.board_del + i * del - del / 2,dy = Constant.board_del + j * del - del / 2;
-                if (chess[i][j] == Side.BLACK.getCode ())
+                if (chess[i][j] == Side.BLACK.getState ())
                 {
                     pencil.setFill (Color.BLACK);
                     pencil.fillOval (dx,dy,r,r);
                 }
-                else if (chess[i][j] == Side.WHITE.getCode ())
+                else if (chess[i][j] == Side.WHITE.getState ())
                 {
                     pencil.setFill(Color.WHITE);
                     pencil.fillOval (dx,dy,r,r);pencil.strokeOval (dx,dy,r,r);
                 }
             }
         }
+    }
+    public void drawPreviewChess(double mouseX, double mouseY, double cellSize) {
+        int row = (int) ((mouseX - Constant.board_del) / cellSize);
+        int col = (int) ((mouseY - Constant.board_del) / cellSize);
+
+        // 检查是否在棋盘范围内
+        if (row >= 0 && row < Constant.LEN && col >= 0 && col < Constant.LEN) {
+            double x = Constant.board_del + row * cellSize - cellSize / 2;
+            double y = Constant.board_del + col * cellSize - cellSize / 2;
+
+            // 获取当前玩家的颜色
+            Side currentSide = gomoku.getCurrentSide();
+            Color color = currentSide == Side.BLACK ? Color.BLACK : Color.WHITE;
+
+            // 设置透明度
+            pencil.setFill(color.deriveColor(0, 1, 1, 0.5));
+
+            // 绘制透明棋子
+            pencil.fillOval(x, y, cellSize, cellSize);
+        }
+    }
+
+    public Board (Gomoku gomoku)
+    {
+        this.gomoku = gomoku;
+        draw_pane (Constant.sz);draw_chess(Constant.sz);
+        getChildren ().add (canvas);
     }
 }

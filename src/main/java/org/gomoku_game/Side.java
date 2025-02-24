@@ -3,10 +3,10 @@ package org.gomoku_game;
 public enum Side
 {
     BLACK (0,"Black"),WHITE (1,"White");
-    private int code;
-    private String str;
+    private int state;
+    private String player;
 
-    Side (int code, String str) {this.code = code;this.str = str;}
-    public int getCode () {return code;}
-    public String getStr () {return str;}
+    Side (int state,String player) {this.state = state;this.player = player;}
+    public int getState () {return state;}
+    public String getPlayer() {return player;}
 }
