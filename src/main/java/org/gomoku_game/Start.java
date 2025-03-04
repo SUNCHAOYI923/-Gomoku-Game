@@ -8,22 +8,35 @@ import javafx.stage.Stage;
 
 public class Start extends Application
 {
+    public static int ty;
     @Override
     public void start (Stage nw)
     {
         nw.setTitle ("Gomoku Start Page");
         VBox root = new VBox (20);
         Label titleLabel = new Label ("Welcome to Gomoku Game");
-        Button startButton = new Button ("Start Game");
+        Button one = new Button ("Single Player Mode");
+        Button two = new Button ("Two Player Mode");
         root.setPadding (new javafx.geometry.Insets (10));
-        root.getChildren ().addAll (titleLabel, startButton);
+        root.getChildren ().addAll (titleLabel,one,two);
         Scene scene = new Scene (root, 300, 200);
         nw.setScene (scene);nw.show ();
-        startButton.setOnAction (event ->
+        one.setOnAction (event ->
         {
             try
             {
-                nw.hide ();
+                nw.hide ();ty = 0;
+                New_Game game = new New_Game ();
+                try {game.start (new Stage ());}
+                catch (Exception e) {e.printStackTrace();}
+            }
+            catch (Exception e) {e.printStackTrace();}
+        });
+        two.setOnAction (event ->
+        {
+            try
+            {
+                nw.hide ();ty = 1;
                 New_Game game = new New_Game ();
                 try {game.start (new Stage ());}
                 catch (Exception e) {e.printStackTrace();}

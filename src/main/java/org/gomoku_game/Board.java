@@ -50,37 +50,32 @@ public class Board extends Pane
                 }
                 else if (chess[i][j] == Side.WHITE.getState ())
                 {
-                    pencil.setFill(Color.WHITE);
+                    pencil.setFill (Color.WHITE);
                     pencil.fillOval (dx,dy,r,r);pencil.strokeOval (dx,dy,r,r);
                 }
             }
         }
     }
-    public void drawPreviewChess(double mouseX, double mouseY, double cellSize) {
-        int row = (int) ((mouseX - Constant.board_del) / cellSize);
-        int col = (int) ((mouseY - Constant.board_del) / cellSize);
-
-        // 检查是否在棋盘范围内
-        if (row >= 0 && row < Constant.LEN && col >= 0 && col < Constant.LEN) {
-            double x = Constant.board_del + row * cellSize - cellSize / 2;
-            double y = Constant.board_del + col * cellSize - cellSize / 2;
-
-            // 获取当前玩家的颜色
-            Side currentSide = gomoku.getCurrentSide();
+    public void drawPreviewChess (double mouseX, double mouseY)
+    {
+        double r = Constant.chess_sz;
+        int row = (int) ((mouseX - Constant.board_del) / r);
+        int col = (int) ((mouseY - Constant.board_del) / r);
+        if (row >= 0 && row < Constant.LEN && col >= 0 && col < Constant.LEN)
+        {
+            double x = Constant.board_del + row * r - r / 2;
+            double y = Constant.board_del + col * r - r / 2;
+            Side currentSide = gomoku.getCurrentSide ();
             Color color = currentSide == Side.BLACK ? Color.BLACK : Color.WHITE;
-
-            // 设置透明度
-            pencil.setFill(color.deriveColor(0, 1, 1, 0.5));
-
-            // 绘制透明棋子
-            pencil.fillOval(x, y, cellSize, cellSize);
+            pencil.setFill (color.deriveColor (0, 1, 1, 0.5));
+            pencil.fillOval (x, y, r, r);
         }
     }
 
     public Board (Gomoku gomoku)
     {
         this.gomoku = gomoku;
-        draw_pane (Constant.sz);draw_chess(Constant.sz);
+        draw_pane (Constant.sz);draw_chess (Constant.sz);
         getChildren ().add (canvas);
     }
 }

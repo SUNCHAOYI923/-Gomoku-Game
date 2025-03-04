@@ -11,14 +11,14 @@ public class New_Game extends Application
         Gomoku gomoku = new Gomoku ();
         Board board = new Board (gomoku);
         Scene scene = new Scene (board,Constant.width,Constant.height);
-        board.setOnMouseClicked (new PlayAction (gomoku,board));
-        board.setOnMouseMoved (event ->
+        board.setOnMouseClicked (new PlayAction (gomoku,board,Start.ty));
+        /*board.setOnMouseMoved (event ->
         {
-            double mouseX = event.getX (),mouseY = event.getY ();
             board.pencil.clearRect (0,0,board.canvas.getWidth (),board.canvas.getHeight ());
-            board.draw_pane (Constant.sz);board.draw_chess (Constant.sz);
-            board.drawPreviewChess(mouseX, mouseY, Constant.sz);
-        });
+            board.draw_chess (Constant.sz);
+            board.drawPreviewChess (event.getX (),event.getY ());
+            board.draw_pane (Constant.sz);
+        });*/
         nw.setScene (scene);nw.setTitle ("Gomoku Game");nw.show ();
     }
 }
