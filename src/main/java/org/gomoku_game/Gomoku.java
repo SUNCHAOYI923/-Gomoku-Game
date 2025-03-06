@@ -28,33 +28,33 @@ public class Gomoku
             changeSide ();
         }
     }
-    public boolean full ()
+    public boolean full (int board[][])
     {
         for (int i = 0; i < Constant.LEN; ++i)
             for (int j = 0; j < Constant.LEN; ++j)
-                if (chess[i][j] == ' ') return false;
+                if (board[i][j] == ' ') return false;
         return true;
     }
-    public boolean judge_win (int row,int col,Side color)
+    public boolean judge_win (int board[][],int row,int col,Side color)
     {
         //检验从 (row,col) 开始 判断棋子是否连成五子
         int l = col,r = col;
-        while (l >= 1 && chess[row][l - 1] == color.getState()) --l;
-        while (r < Constant.LEN && chess[row][r + 1] == color.getState()) ++r;
+        while (l >= 1 && board[row][l - 1] == color.getState ()) --l;
+        while (r < Constant.LEN - 1 && board[row][r + 1] == color.getState ()) ++r;
         if (r - l + 1 >= 5) return true;
         l = row;r = row;
-        while (l >= 1 && chess[l - 1][col] == color.getState()) --l;
-        while (r < Constant.LEN && chess[r + 1][col] == color.getState()) ++r;
+        while (l >= 1 && board[l - 1][col] == color.getState ()) --l;
+        while (r < Constant.LEN - 1 && board[r + 1][col] == color.getState ()) ++r;
         if (r - l + 1 >= 5) return true;
         int x = row,y = col,cnt = 1;
-        while (x >= 1 && y >= 1 && chess[x - 1][y - 1] == color.getState()) {--x;--y;++cnt;}
+        while (x >= 1 && y >= 1 && board[x - 1][y - 1] == color.getState ()) {--x;--y;++cnt;}
         x = row;y = col;
-        while (x < Constant.LEN && y < Constant.LEN && chess[x + 1][y + 1] == color.getState()) {++x;++y;++cnt;}
+        while (x < Constant.LEN - 1 && y < Constant.LEN - 1 && board[x + 1][y + 1] == color.getState ()) {++x;++y;++cnt;}
         if (cnt >= 5) return true;
         x = row;y = col;cnt = 1;
-        while (x >= 1 && y < Constant.LEN && chess[x - 1][y + 1] == color.getState()) {--x;++y;++cnt;}
+        while (x >= 1 && y < Constant.LEN - 1 && board[x - 1][y + 1] == color.getState ()) {--x;++y;++cnt;}
         x = row;y = col;
-        while (x < Constant.LEN && y >= 1 && chess[x + 1][y - 1] == color.getState()) {++x;--y;++cnt;}
+        while (x < Constant.LEN - 1 && y >= 1 && board[x + 1][y - 1] == color.getState ()) {++x;--y;++cnt;}
         if (cnt >= 5) return true;
         return false;
     }
@@ -66,14 +66,21 @@ public class Gomoku
         List<Integer> score = new ArrayList<Integer>();
         for (int i = 0;i < Constant.LEN;++i)
             for (int j = 0;j < Constant.LEN;++j)
-                if (judge_win (i,j,Side.BLACK) || judge_win (i,j,Side.WHITE))
+                if (board[i][j] != ' ' && judge_win (board,i,j,board[i][j] == 1 ? Side.WHITE : Side.BLACK))
                 {
+                    System.out.printf("%d %d\n",i,j);
+                    for (int dx = 0;dx < Constant.LEN;++dx)
+                    {
+                        for (int dy = 0;dy < Constant.LEN;++dy)
+                            System.out.printf ("%d ",board[dx][dy]);
+                        System.out.println ();
+                    }
+                    System.out.printf("\n");
                     rec[0] = evaluate (board,role ^ 1);
                     return rec;
                 }
-        if (full () || dep == Constant.MAX_DEPTH)
+        if (full (board) || dep == Constant.MAX_DEPTH)
         {
-            System.out.printf("%d %d %d %d\n",dep,alpha,beta,role);
             rec[0] = evaluate (board,role ^ 1);
             return rec;
         }
@@ -122,14 +129,6 @@ public class Gomoku
         for (int i = 0; i < Constant.LEN; ++i)
             for (int j = 0; j < Constant.LEN; ++j)
                 if (board[i][j] != ' ') sum += solve (board, i, j, role);
-        for (int i = 0; i < Constant.LEN; ++i)
-        {
-            for (int j = 0; j < Constant.LEN; ++j)
-                System.out.printf("%d ", board[i][j]);
-        System.out.printf("\n");
-    }
-        System.out.printf("sum = %d\n",sum);
-        System.out.printf("----------------------------------------\n");
         return sum;
     }
     private boolean check_bd (int x,int y,int dx,int dy)
@@ -155,8 +154,7 @@ public class Gomoku
             o ^= 1;
             while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == color) {x += dx[o];y += dy[o];}
             dl[1] = x;dr[1] = y;
-            int len = Math.max (Math.abs(dl[0] - dl[1]),Math.abs (dr[0] - dr[1]));
-            System.out.printf("%d\n",len);
+            int len = Math.max (Math.abs(dl[0] - dl[1]) + 1,Math.abs (dr[0] - dr[1]) + 1);
             if (len >= 5) return 10000000 * ty;
             for (int j = 4;j >= 1;--j)
             {
@@ -177,6 +175,10 @@ public class Gomoku
                 }
                 max_value = Math.max(max_value,Math.max(0.0,8000 * Math.min (1.0,1.0 * leftside / (5 - j))) +  Math.max(0.0,8000 * Math.min (1.0,1.0 * rightside / (5 - j))));
             }
+        }
+        for (int i = 0;i < 4;++i)
+        {
+            ;
         }
         return (int)max_value * ty;
     }
