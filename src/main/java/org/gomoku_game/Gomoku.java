@@ -1,6 +1,4 @@
 package org.gomoku_game;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +6,7 @@ public class Gomoku
 {
     private static Side currentSide = Side.BLACK;
     public static int[][] chess = new int[Constant.LEN + 1][Constant.LEN + 1];
-    public Side getCurrentSide () {return currentSide;}
+    public static Side getCurrentSide() {return currentSide;}
     public void setCurrentSide (Side currentSide) {this.currentSide = currentSide;}
     public static int[][] getChess() {return chess;}
     public void changeSide () {setCurrentSide (currentSide == Side.BLACK ? Side.WHITE : Side.BLACK);}
@@ -17,16 +15,19 @@ public class Gomoku
     {
         for (int i = 0; i < Constant.LEN; ++i)
             for (int j = 0; j < Constant.LEN; ++j) chess[i][j] = ' ';
+        setCurrentSide (Side.BLACK);
     }
 
-    public void play (int x,int y)
+    public boolean play (int x,int y)
     {
         if (chess[x][y] == ' ')
         {
             chess[x][y] = currentSide.getState ();
             System.out.printf ("%d %d %d\n",x,y,chess[x][y]);
             changeSide ();
+            return true;
         }
+        else return false;
     }
     public boolean full (int board[][])
     {

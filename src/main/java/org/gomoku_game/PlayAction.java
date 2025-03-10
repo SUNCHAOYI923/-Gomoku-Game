@@ -1,10 +1,9 @@
 package org.gomoku_game;
-import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -20,12 +19,20 @@ public class PlayAction implements EventHandler <MouseEvent>
         this.board = board;this.gomoku = gomoku;this.ty = ty;
     }
 
-    private void end (String s)
+    public static void end (String s)
     {
-        Alert alert = new Alert (Alert.AlertType.INFORMATION);
-        alert.setTitle ("Gomuku Game");alert.setHeaderText ("Hint");
-        String msg = s;
-        alert.setContentText (msg);alert.showAndWait ();
+        Alert alert = new Alert (Alert.AlertType.CONFIRMATION);
+        alert.setTitle ("Gomoku Game");alert.setHeaderText ("Game Over!\n" + s);alert.setContentText ("Restart the game?");
+        ButtonType buttonTypeRestart = new ButtonType ("Yes", ButtonBar.ButtonData.YES);
+        ButtonType buttonTypeExit = new ButtonType ("No", ButtonBar.ButtonData.NO);
+
+        alert.getButtonTypes ().setAll (buttonTypeRestart, buttonTypeExit);
+
+        alert.showAndWait ().ifPresent (response ->
+        {
+            if (response == buttonTypeRestart) Start.showStartPage ();
+            else if (response == buttonTypeExit) System.exit (0);
+        });
     }
     @Override
     public void handle (MouseEvent event)
@@ -34,7 +41,9 @@ public class PlayAction implements EventHandler <MouseEvent>
         int len = Constant.sz,sx = 0,sy = 0;
         sx = (int)((event.getX () - Constant.board_del + len / 2) / len);
         sy = (int)((event.getY () - Constant.board_del + len / 2) / len);
-        gomoku.play (sx,sy);board.draw_chess (len);
+        boolean valid = gomoku.play (sx,sy);
+        if (valid == false) return ;
+        board.draw_chess (len);
         //write (sx,sy,ty)
         if (gomoku.judge_win (chess,sx,sy,gomoku.getCurrentSide () == Side.BLACK ? Side.WHITE : Side.BLACK))
         {
