@@ -1,6 +1,7 @@
 package org.gomoku_game;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -41,11 +42,12 @@ public class New_Game extends Application
         VBox container = new VBox (10);
         container.setPadding (new Insets (10));
         container.setStyle ("-fx-background-color: #ffffcc;");
+        container.setPrefWidth (250);
 
         HBox controlPanel = new HBox (10);
-        controlPanel.setPadding (new Insets(5));
+        controlPanel.setPadding (new Insets (5));
         Button pauseButton = new Button ("Pause");
-        pauseButton.setOnAction (event -> Platform.runLater(() -> end ("New Game")));
+        pauseButton.setOnAction (event -> Platform.runLater(() -> end ("Pause")));
         controlPanel.getChildren ().add (pauseButton);
         container.getChildren ().add (controlPanel);
 
@@ -57,6 +59,12 @@ public class New_Game extends Application
         blackInfoPanel.add (blackPlayerInfo, 0, 0);
         blackInfoPanel.add (B_ti, 0, 1);
         container.getChildren ().add (blackInfoPanel);
+
+        Separator separator = new Separator ();
+        separator.setHalignment (HPos.CENTER);
+        VBox.setMargin (separator, new Insets (10, 0, 10, 0)); // 设置分隔线上下的间距
+        container.getChildren ().add (separator);
+
 
         GridPane whiteInfoPanel = new GridPane ();
         whiteInfoPanel.setVgap (5);
@@ -86,7 +94,7 @@ public class New_Game extends Application
                             if (cur == Side.BLACK) ++Black_ti;
                             else ++White_ti;
                             upd_time ();
-                            check_time(cur);
+                            check_time (cur);
                         });
                     }
                 }

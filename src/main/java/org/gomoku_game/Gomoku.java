@@ -20,11 +20,11 @@ public class Gomoku
 
     public boolean play (int x,int y)
     {
+        if (x < 0 || x >= Constant.LEN || y < 0 || y >= Constant.LEN) return false;
         if (chess[x][y] == ' ')
         {
             chess[x][y] = currentSide.getState ();
             System.out.printf ("%d %d %d\n",x,y,chess[x][y]);
-            changeSide ();
             return true;
         }
         else return false;
@@ -69,14 +69,6 @@ public class Gomoku
             for (int j = 0;j < Constant.LEN;++j)
                 if (board[i][j] != ' ' && judge_win (board,i,j,board[i][j] == 1 ? Side.WHITE : Side.BLACK))
                 {
-                    System.out.printf("%d %d\n",i,j);
-                    for (int dx = 0;dx < Constant.LEN;++dx)
-                    {
-                        for (int dy = 0;dy < Constant.LEN;++dy)
-                            System.out.printf ("%d ",board[dx][dy]);
-                        System.out.println ();
-                    }
-                    System.out.printf("\n");
                     rec[0] = evaluate (board,role ^ 1);
                     return rec;
                 }
@@ -176,10 +168,6 @@ public class Gomoku
                 }
                 max_value = Math.max(max_value,Math.max(0.0,8000 * Math.min (1.0,1.0 * leftside / (5 - j))) +  Math.max(0.0,8000 * Math.min (1.0,1.0 * rightside / (5 - j))));
             }
-        }
-        for (int i = 0;i < 4;++i)
-        {
-            ;
         }
         return (int)max_value * ty;
     }
