@@ -15,9 +15,9 @@ public class PlayAction implements EventHandler<MouseEvent>
     private Board board;
     private int ty;
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool (1);
-    private volatile boolean AI_turn = false; //标记此时是否为 AI 在下棋
+    public static volatile boolean AI_turn = false; //标记此时是否为 AI 在下棋
 
-    public PlayAction(Gomoku gomoku, Board board, int ty) {this.board = board;this.gomoku = gomoku;this.ty = ty;}
+    public PlayAction (Gomoku gomoku, Board board, int ty) {this.board = board;this.gomoku = gomoku;this.ty = ty;}
 
     public static void end (String s)
     {
@@ -39,6 +39,7 @@ public class PlayAction implements EventHandler<MouseEvent>
     @Override
     public void handle (MouseEvent event)
     {
+        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         if (AI_turn) return; // 如果AI正在下棋，则忽略玩家操作
         int chess[][] = Gomoku.getChess ();
         int len = Constant.sz,sx = 0,sy = 0;
@@ -53,12 +54,12 @@ public class PlayAction implements EventHandler<MouseEvent>
             end ((gomoku.getCurrentSide ()).getPlayer() + " wins！");
             return ;
         }
-        gomoku.changeSide ();
+        gomoku.changeSide ();New_Game.upd_button ();
         if (gomoku.full (chess)) {end ("Draw!");return ;}
         if (ty != 0 && gomoku.getCurrentSide() != Side.BLACK) AI_play();
     }
 
-    private void ch_end(int sx, int sy)
+    private void ch_end (int sx,int sy)
     {
         if (gomoku.judge_win (Gomoku.getChess (), sx, sy, gomoku.getCurrentSide ()))
         {
@@ -75,6 +76,7 @@ public class PlayAction implements EventHandler<MouseEvent>
 
     private void AI_play ()
     {
+        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         AI_turn = true;
         scheduler.schedule (() ->
         {
@@ -85,7 +87,7 @@ public class PlayAction implements EventHandler<MouseEvent>
                 gomoku.play (nw_sx, nw_sy);
                 board.draw_chess (Constant.sz);
                 ch_end (nw_sx, nw_sy);
-                AI_turn = false;
+                AI_turn = false;New_Game.upd_button ();
             });
         }, 1, TimeUnit.SECONDS);
     }

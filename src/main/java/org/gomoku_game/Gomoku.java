@@ -6,9 +6,14 @@ public class Gomoku
 {
     private static Side currentSide = Side.BLACK;
     public static int[][] chess = new int[Constant.LEN + 1][Constant.LEN + 1];
-    public static Side getCurrentSide() {return currentSide;}
-    public void setCurrentSide (Side currentSide) {this.currentSide = currentSide;}
-    public static int[][] getChess() {return chess;}
+    public static Side getCurrentSide () {return currentSide;}
+    public static void setChess (int[][] nw)
+    {
+        for (int i = 0; i < Constant.LEN; ++i)
+            for (int j = 0; j < Constant.LEN; ++j) chess[i][j] = nw[i][j];
+    }
+    public static void setCurrentSide (Side nw) {currentSide = nw;}
+    public static int[][] getChess () {return chess;}
     public void changeSide () {setCurrentSide (currentSide == Side.BLACK ? Side.WHITE : Side.BLACK);}
 
     public Gomoku ()

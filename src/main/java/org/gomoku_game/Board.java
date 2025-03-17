@@ -3,30 +3,27 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 
 public class Board extends Pane
 {
-    public Canvas canvas;
-    private Circle circle;
-    public GraphicsContext pencil;
+    private Canvas boardCanvas,chessCanvas;
+    private GraphicsContext boardPencil;
+    private static GraphicsContext chessPencil;
     private Gomoku gomoku;
-    private void draw_cir (double x,double y)
+    private void draw_cir (double x,double y)//绘制四个小圆点
     {
         double r = 3;
-        circle = new Circle (Constant.board_del + x,Constant.board_del + y,r);
-        getChildren ().add (circle);
+        boardPencil.fillOval (Constant.board_del + x - r, Constant.board_del + y - r, 2 * r, 2 * r);
     }
     public void draw_pane (double del)
     {
-        canvas = new Canvas (Constant.width,Constant.height);
-        pencil = canvas.getGraphicsContext2D ();
-        pencil.clearRect (0,0,Constant.LEN,Constant.LEN);pencil.setStroke (Color.BLACK);
+        boardPencil.clearRect (0, 0, Constant.width, Constant.height);
+        boardPencil.setStroke (Color.BLACK);
         for (int i = 0;i < Constant.LEN - 1;++i)
         {
             for (int j = 0;j < Constant.LEN - 1;++j)
             {
-                pencil.strokeRect (Constant.board_del + i * del,Constant.board_del + del * j,del,del);
+                boardPencil.strokeRect (Constant.board_del + i * del, Constant.board_del + del * j, del, del);
                 if (i == 3 && j == 3) draw_cir (i * del, del * j);
                 if (i == 3 && j == 15) draw_cir (i * del, del * j);
                 if (i == 15 && j == 3) draw_cir (i * del, del * j);
@@ -35,8 +32,9 @@ public class Board extends Pane
             }
         }
     }
-    public void draw_chess (double del)
+    public static void draw_chess (double del)
     {
+        chessPencil.clearRect (0, 0, Constant.width, Constant.height);//清空画布
         int chess[][] = Gomoku.getChess ();double r = Constant.chess_sz;
         for (int i = 0;i < Constant.LEN;++i)
         {
@@ -45,13 +43,13 @@ public class Board extends Pane
                 double dx = Constant.board_del + i * del - del / 2,dy = Constant.board_del + j * del - del / 2;
                 if (chess[i][j] == Side.BLACK.getState ())
                 {
-                    pencil.setFill (Color.BLACK);
-                    pencil.fillOval (dx,dy,r,r);
+                    chessPencil.setFill (Color.BLACK);
+                    chessPencil.fillOval (dx,dy,r,r);
                 }
                 else if (chess[i][j] == Side.WHITE.getState ())
                 {
-                    pencil.setFill (Color.WHITE);
-                    pencil.fillOval (dx,dy,r,r);pencil.strokeOval (dx,dy,r,r);
+                    chessPencil.setFill (Color.WHITE);
+                    chessPencil.fillOval (dx,dy,r,r);chessPencil.strokeOval (dx,dy,r,r);
                 }
             }
         }
@@ -67,15 +65,19 @@ public class Board extends Pane
             double y = Constant.board_del + col * r - r / 2;
             Side currentSide = gomoku.getCurrentSide ();
             Color color = currentSide == Side.BLACK ? Color.BLACK : Color.WHITE;
-            pencil.setFill (color.deriveColor (0, 1, 1, 0.5));
-            pencil.fillOval (x, y, r, r);
+            chessPencil.setFill (color.deriveColor (0, 1, 1, 0.5));
+            chessPencil.fillOval (x, y, r, r);
         }
     }
 
     public Board (Gomoku gomoku)
     {
         this.gomoku = gomoku;
-        draw_pane (Constant.sz);draw_chess (Constant.sz);
-        getChildren ().add (canvas);
+        boardCanvas = new Canvas (Constant.width, Constant.height);
+        chessCanvas = new Canvas (Constant.width, Constant.height);
+        boardPencil = boardCanvas.getGraphicsContext2D ();
+        chessPencil = chessCanvas.getGraphicsContext2D ();
+        draw_chess (Constant.sz);draw_pane (Constant.sz);
+        getChildren().addAll (boardCanvas, chessCanvas);
     }
 }
