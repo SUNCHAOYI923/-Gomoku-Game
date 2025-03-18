@@ -33,7 +33,7 @@ public class Start extends Application
         two.setOnAction (event -> {ty = 1;launchGame (stage);});
         load.setOnAction (event ->
         {
-            org = File.loadGame (stage);
+            org = FILE.loadGame (stage);
             if (org == null)
             {
                 javafx.scene.control.Alert alert = new javafx.scene.control.Alert (javafx.scene.control.Alert.AlertType.ERROR);

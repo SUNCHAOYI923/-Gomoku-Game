@@ -54,7 +54,7 @@ public class Board extends Pane
             }
         }
     }
-    public void drawPreviewChess (double mouseX, double mouseY)
+    /*public void drawPreviewChess (double mouseX, double mouseY)
     {
         double r = Constant.chess_sz;
         int row = (int) ((mouseX - Constant.board_del) / r);
@@ -68,7 +68,7 @@ public class Board extends Pane
             chessPencil.setFill (color.deriveColor (0, 1, 1, 0.5));
             chessPencil.fillOval (x, y, r, r);
         }
-    }
+    }*/
 
     public Board (Gomoku gomoku)
     {

@@ -21,8 +21,8 @@ public class PlayAction implements EventHandler<MouseEvent>
 
     public static void end (String s)
     {
-        Platform.runLater (() ->
-        { // 确保在JavaFX应用线程上执行
+        Platform.runLater (() ->  // 确保在 JavaFX 应用线程上执行
+        {
             Alert alert = new Alert (Alert.AlertType.CONFIRMATION);
             alert.setTitle ("Gomoku Game");alert.setHeaderText ("Game Over!\n" + s);alert.setContentText ("Restart the game?");
             ButtonType buttonTypeRestart = new ButtonType ("Yes", ButtonBar.ButtonData.YES);
@@ -61,9 +61,9 @@ public class PlayAction implements EventHandler<MouseEvent>
 
     private void ch_end (int sx,int sy)
     {
-        if (gomoku.judge_win (Gomoku.getChess (), sx, sy, gomoku.getCurrentSide ()))
+        if (gomoku.judge_win (Gomoku.getChess (),sx,sy,gomoku.getCurrentSide ()))
         {
-            end (gomoku.getCurrentSide().getPlayer() + " wins！");
+            end (gomoku.getCurrentSide ().getPlayer () + " wins！");
             return;
         }
         if (gomoku.full (gomoku.chess))

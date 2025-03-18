@@ -25,9 +25,7 @@ public class New_Game extends Application
     {
         int[][] board_st; //棋盘状态
         Side player; //当前玩家
-
         public GameState (int[][] boardState, Side currentPlayer) {this.board_st = copy_board (boardState);this.player = currentPlayer;}
-
         private int[][] copy_board (int[][] ori)
         {
             if (ori == null) return null;
@@ -42,6 +40,7 @@ public class New_Game extends Application
     {
         Gomoku gomoku = new Gomoku ();
         final Board board = new Board (gomoku);
+        undoStack.clear ();redoStack.clear ();
         if (Start.org != null) // 如果存在游戏状态，则加载游戏状态
         {
             Gomoku.setChess (Start.org.board_st);
@@ -61,14 +60,14 @@ public class New_Game extends Application
         });
         BorderPane borderPane = new BorderPane ();
         borderPane.setCenter (board);
-        VBox rightPanel = inf ();
+        VBox rightPanel = inf (nw);
         borderPane.setRight (rightPanel);
         Scene scene = new Scene (borderPane, Constant.width, Constant.height);
         nw.setScene (scene);nw.setTitle ("Gomoku Game");nw.centerOnScreen ();nw.show ();
         TIME ();upd_button ();
     }
 
-    private VBox inf ()
+    private VBox inf (Stage nw)
     {
         VBox container = new VBox (10);
         container.setPadding (new Insets (10));
@@ -77,7 +76,7 @@ public class New_Game extends Application
         HBox controlPanel = new HBox (10);
         controlPanel.setPadding (new Insets (5));
         saveButton = new Button ("Save");
-        saveButton.setOnAction (event -> File.save_game ());
+        saveButton.setOnAction (event -> FILE.save_game (nw));
         Button pauseButton = new Button ("Pause");
         pauseButton.setOnAction (event -> Platform.runLater (() -> end ("Pause")));
         undoButton = new Button ("Undo");
@@ -185,7 +184,8 @@ public class New_Game extends Application
 
     public static void upd_st (int[][] board, Side currentPlayer)
     {
-        undoStack.push (new GameState (board, currentPlayer));redoStack.clear ();
+        undoStack.push (new GameState (board, currentPlayer));
+        redoStack.clear ();
         upd_button ();
     }
     private void undo ()
@@ -230,7 +230,8 @@ public class New_Game extends Application
 
     private void loadGameState (GameState state)
     {
-        Gomoku.setChess (state.board_st);Gomoku.setCurrentSide (state.player);
+        Gomoku.setChess (state.board_st);
+        Gomoku.setCurrentSide (state.player);
         Board.draw_chess (Constant.sz);
     }
 }
