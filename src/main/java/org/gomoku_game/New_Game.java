@@ -15,11 +15,15 @@ public class New_Game extends Application
 {
     public static int Black_ti = 0,White_ti = 0;
     private Label B_ti,W_ti;
-    private int tot = Constant.MAX_TIME;
+    private int tot = Constant.MAX_TIME,lim = Constant.MAX_SINGLE_TIME;
+    public static int cur_ti = 0;
     private boolean stop = false;
+    public static boolean br = false;
     private static Stack <GameState> undoStack = new Stack <> ();
     private static Stack <GameState> redoStack = new Stack <> ();
     private static Button undoButton,redoButton,saveButton;
+    public static ProgressBar white_bar,black_bar;
+    private double per;
 
     static class GameState implements Serializable
     {
@@ -38,6 +42,8 @@ public class New_Game extends Application
     @Override
     public void start (Stage nw)
     {
+        white_bar = new ProgressBar (1.0);black_bar = new ProgressBar (1.0);
+        per = 1.0 / lim;br = false;
         Gomoku gomoku = new Gomoku ();
         final Board board = new Board (gomoku);
         undoStack.clear ();redoStack.clear ();
@@ -46,8 +52,12 @@ public class New_Game extends Application
             Gomoku.setChess (Start.org.board_st);
             Gomoku.setCurrentSide (Start.org.player);
             board.draw_chess (Constant.sz);
+            System.out.printf("%d\n",cur_ti);
+            if (Start.org.player == Side.BLACK) black_bar.setProgress (1.0 - cur_ti * per);
+            else white_bar.setProgress (1.0 - cur_ti * per);
             Start.org = null;
         }
+        else  {Black_ti = 0;White_ti = 0;}
         board.setOnMouseClicked (event ->
         {
             if (!board.isDisabled ()) // 检查是否被禁用
@@ -58,6 +68,35 @@ public class New_Game extends Application
                 board.setDisable (false);
             }
         });
+
+        Thread timerThread = new Thread (() ->
+        {
+            while (!br) // 防止多个计数器同时工作
+            {
+                try
+                {
+                    Thread.sleep (1000);
+                    if (!stop)
+                    {
+                        Platform.runLater(() ->
+                        {
+                            ++cur_ti;
+                            Side currentSide = Gomoku.getCurrentSide ();
+                            upd_bar (currentSide);
+                            if (cur_ti >= lim) //超时切换玩家
+                            {
+                                switchPlayer ();
+                                cur_ti = 0;
+                                reset_bar (currentSide);
+                            }
+                        });
+                    }
+                }
+                catch (InterruptedException e) {e.printStackTrace();}
+            }
+        });
+        timerThread.setDaemon (true);timerThread.start ();
+
         BorderPane borderPane = new BorderPane ();
         borderPane.setCenter (board);
         VBox rightPanel = inf (nw);
@@ -65,6 +104,29 @@ public class New_Game extends Application
         Scene scene = new Scene (borderPane, Constant.width, Constant.height);
         nw.setScene (scene);nw.setTitle ("Gomoku Game");nw.centerOnScreen ();nw.show ();
         TIME ();upd_button ();
+    }
+    private void upd_bar (Side side)
+    {
+        if (side == Side.BLACK) black_bar.setProgress (black_bar.getProgress () - per);
+        else white_bar.setProgress (white_bar.getProgress () - per);
+    }
+
+    private void reset_bar (Side side)
+    {
+        if (side == Side.BLACK) black_bar.setProgress (1.0);
+        else white_bar.setProgress (1.0);
+    }
+    private void switchPlayer ()
+    {
+        Side nextSide = Gomoku.getCurrentSide () == Side.BLACK ? Side.WHITE : Side.BLACK;
+        Gomoku.setCurrentSide (nextSide); // 切换当前玩家
+        Platform.runLater (() ->
+        {
+            Alert alert = new Alert (Alert.AlertType.INFORMATION);
+            alert.setTitle("Gomoku Game");alert.setHeaderText (null);
+            alert.setContentText ("The side has been changed due to timeout!");
+            alert.showAndWait ();
+        });
     }
 
     private VBox inf (Stage nw)
@@ -93,6 +155,7 @@ public class New_Game extends Application
         B_ti = new Label ("Rest time : " + formatTime (tot - Black_ti));
         blackInfoPanel.add (blackPlayerInfo, 0, 0);
         blackInfoPanel.add (B_ti, 0, 1);
+        blackInfoPanel.add (black_bar, 0, 2);
         container.getChildren ().add (blackInfoPanel);
 
         Separator separator = new Separator ();
@@ -107,6 +170,7 @@ public class New_Game extends Application
         W_ti = new Label ("Rest time : " + formatTime (tot - White_ti));
         whiteInfoPanel.add (whitePlayerInfo, 0, 0);
         whiteInfoPanel.add (W_ti, 0, 1);
+        whiteInfoPanel.add (white_bar, 0, 2);
         container.getChildren ().add (whiteInfoPanel);
         return container;
     }
@@ -121,7 +185,7 @@ public class New_Game extends Application
     {
         Thread timerThread = new Thread (() ->
         {
-            while (true)
+            while (!br)
             {
                 try
                 {
@@ -177,7 +241,7 @@ public class New_Game extends Application
         alert.getButtonTypes ().setAll (buttonTypeRestart, buttonTypeContinue);
         alert.showAndWait ().ifPresent (response ->
         {
-            if (response == buttonTypeRestart) Start.showStartPage();
+            if (response == buttonTypeRestart) {br = true;Start.showStartPage ();}
             else stop = !stop;
         });
     }

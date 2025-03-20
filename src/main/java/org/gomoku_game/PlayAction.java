@@ -30,7 +30,7 @@ public class PlayAction implements EventHandler<MouseEvent>
             alert.getButtonTypes ().setAll (buttonTypeRestart, buttonTypeExit);
             alert.showAndWait ().ifPresent (response ->
             {
-                if (response == buttonTypeRestart) Start.showStartPage ();
+                if (response == buttonTypeRestart) {New_Game.br = true;Start.showStartPage ();}
                 else if (response == buttonTypeExit) System.exit (0);
             });
         });
@@ -39,14 +39,16 @@ public class PlayAction implements EventHandler<MouseEvent>
     @Override
     public void handle (MouseEvent event)
     {
-        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         if (AI_turn) return; // 如果AI正在下棋，则忽略玩家操作
         int chess[][] = Gomoku.getChess ();
         int len = Constant.sz,sx = 0,sy = 0;
         sx = (int)((event.getX () - Constant.board_del + len / 2) / len);
         sy = (int)((event.getY () - Constant.board_del + len / 2) / len);
         boolean valid = gomoku.play (sx,sy);
-        if (valid == false) return ;
+        if (valid == false) return ;//不合法无需继续操作
+        New_Game.cur_ti = 0;
+        New_Game.white_bar.setProgress (1.0);New_Game.black_bar.setProgress (1.0);
+        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         board.draw_chess (len);
         //write (sx,sy,ty)
         if (gomoku.judge_win (chess,sx,sy,gomoku.getCurrentSide ()))

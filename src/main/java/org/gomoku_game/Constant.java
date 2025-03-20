@@ -10,4 +10,5 @@ public class Constant
     public static final int board_del = 120;
     public static final int MAX_DEPTH = 2;
     public static final int MAX_TIME = 1200;
+    public static final int MAX_SINGLE_TIME = 30;
 }

@@ -20,6 +20,7 @@ public class FILE
             New_Game.GameState gameState = new New_Game.GameState (Gomoku.getChess (), Gomoku.getCurrentSide ());
             output.writeObject (gameState);output.writeInt (Start.ty);
             output.writeInt (New_Game.Black_ti);output.writeInt (New_Game.White_ti);
+            output.writeInt (New_Game.cur_ti);
             output.close ();
             Alert alert = new Alert (Alert.AlertType.INFORMATION);
             alert.setTitle ("Gomoku Game");alert.setHeaderText (null);alert.setContentText ("Game saved successfully.");
@@ -46,6 +47,7 @@ public class FILE
             New_Game.GameState gameState = (New_Game.GameState) input.readObject ();
             Start.ty = input.readInt ();
             New_Game.Black_ti = input.readInt ();New_Game.White_ti = input.readInt ();
+            New_Game.cur_ti = input.readInt ();
             input.close ();
             return gameState;
         }

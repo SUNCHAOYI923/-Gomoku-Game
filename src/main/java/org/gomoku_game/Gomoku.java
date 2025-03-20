@@ -122,7 +122,8 @@ public class Gomoku
             return rec;
         }
     }
-    private int evaluate (int[][] board,int role) {
+    private int evaluate (int[][] board,int role)
+    {
         int sum = 0;
         for (int i = 0; i < Constant.LEN; ++i)
             for (int j = 0; j < Constant.LEN; ++j)
