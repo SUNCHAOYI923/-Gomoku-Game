@@ -17,7 +17,7 @@ public class New_Game extends Application
     private Label B_ti,W_ti;
     private int tot = Constant.MAX_TIME,lim = Constant.MAX_SINGLE_TIME;
     public static int cur_ti = 0;
-    private boolean stop = false;
+    public static boolean stop = false;
     public static boolean br = false;
     private static Stack <GameState> undoStack = new Stack <> ();
     private static Stack <GameState> redoStack = new Stack <> ();
@@ -47,12 +47,12 @@ public class New_Game extends Application
         Gomoku gomoku = new Gomoku ();
         final Board board = new Board (gomoku);
         undoStack.clear ();redoStack.clear ();
+        upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         if (Start.org != null) // 如果存在游戏状态，则加载游戏状态
         {
             Gomoku.setChess (Start.org.board_st);
             Gomoku.setCurrentSide (Start.org.player);
             board.draw_chess (Constant.sz);
-            System.out.printf("%d\n",cur_ti);
             if (Start.org.player == Side.BLACK) black_bar.setProgress (1.0 - cur_ti * per);
             else white_bar.setProgress (1.0 - cur_ti * per);
             Start.org = null;
@@ -142,7 +142,7 @@ public class New_Game extends Application
         Button pauseButton = new Button ("Pause");
         pauseButton.setOnAction (event -> Platform.runLater (() -> end ("Pause")));
         undoButton = new Button ("Undo");
-        undoButton.setOnAction (event -> {undo ();upd_button ();});//禁用/启用按钮的切换
+        undoButton.setOnAction (event -> {undo ();upd_button ();}); // 禁用/启用按钮的切换
         redoButton = new Button ("Redo");
         redoButton.setOnAction (event -> {redo ();upd_button ();});
         controlPanel.getChildren ().addAll (saveButton,pauseButton,undoButton,redoButton);
@@ -176,8 +176,9 @@ public class New_Game extends Application
     }
     public static void upd_button () {Platform.runLater (() ->
     {
-        undoButton.setDisable (undoStack.isEmpty ());
-        redoButton.setDisable (redoStack.isEmpty ());
+        // AI 在下棋时按钮全面禁用
+        undoButton.setDisable (PlayAction.AI_turn || undoStack.size () <= 1);
+        redoButton.setDisable (PlayAction.AI_turn || redoStack.empty ());
         saveButton.setDisable (PlayAction.AI_turn);
     });}
 
@@ -203,7 +204,6 @@ public class New_Game extends Application
                     }
                 }
                 catch (InterruptedException e) {e.printStackTrace ();}
-
             }
         });
         timerThread.setDaemon (true);timerThread.start ();
@@ -241,8 +241,8 @@ public class New_Game extends Application
         alert.getButtonTypes ().setAll (buttonTypeRestart, buttonTypeContinue);
         alert.showAndWait ().ifPresent (response ->
         {
+            stop = !stop;
             if (response == buttonTypeRestart) {br = true;Start.showStartPage ();}
-            else stop = !stop;
         });
     }
 
@@ -254,20 +254,23 @@ public class New_Game extends Application
     }
     private void undo ()
     {
-        if (!undoStack.isEmpty ())
+        if (undoStack.size () > 1)
         {
-            GameState gameState = undoStack.pop ();
+            undoStack.pop ();
             redoStack.push (new GameState (Gomoku.getChess (), Gomoku.getCurrentSide ()));
+            GameState gameState = undoStack.peek ();
             loadGameState (gameState);
             if (Start.ty == 1) // 双人模式下撤销两次
             {
-                if (!undoStack.isEmpty())
+                if (undoStack.size () > 1)
                 {
-                    gameState = undoStack.pop ();
+                    undoStack.pop ();
                     redoStack.push (new GameState (Gomoku.getChess (), Gomoku.getCurrentSide ()));
-                    loadGameState (gameState);
+                    gameState = undoStack.peek ();
+
                 }
             }
+            loadGameState (gameState);
             upd_button ();
         }
     }
@@ -277,17 +280,19 @@ public class New_Game extends Application
         if (!redoStack.isEmpty ())
         {
             GameState gameState = redoStack.pop ();
-            undoStack.push (new GameState (Gomoku.getChess (), Gomoku.getCurrentSide ()));
             loadGameState (gameState);
+            undoStack.push (new GameState (Gomoku.getChess (), Gomoku.getCurrentSide ()));
             if (Start.ty == 1)
             {
                 if (!redoStack.isEmpty ())
                 {
                     gameState = redoStack.pop ();
-                    undoStack.push (new GameState (Gomoku.getChess (), Gomoku.getCurrentSide ()));
                     loadGameState (gameState);
+                    undoStack.push (new GameState (Gomoku.getChess (), Gomoku.getCurrentSide ()));
+
                 }
             }
+
             upd_button ();
         }
     }

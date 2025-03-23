@@ -74,7 +74,7 @@ public class Gomoku
             for (int j = 0;j < Constant.LEN;++j)
                 if (board[i][j] != ' ' && judge_win (board,i,j,board[i][j] == 1 ? Side.WHITE : Side.BLACK))
                 {
-                    rec[0] = evaluate (board,role ^ 1);
+                    rec[0] = 1000000;
                     return rec;
                 }
         if (full (board) || dep == Constant.MAX_DEPTH)
@@ -122,26 +122,87 @@ public class Gomoku
             return rec;
         }
     }
-    private int evaluate (int[][] board,int role)
+    private int evaluate (int[][] board, int role)
     {
-        int sum = 0;
-        for (int i = 0; i < Constant.LEN; ++i)
-            for (int j = 0; j < Constant.LEN; ++j)
-                if (board[i][j] != ' ') sum += solve (board, i, j, role);
-        return sum;
+        for (int i = 0;i < Constant.LEN;++i)
+        {
+            for (int j = 0;j < Constant.LEN;++j)
+            {
+                System.out.printf ("%d ",board[i][j]);
+            }
+            System.out.printf("\n");
+        }
+        int weights[] = {0, 200, 100, 1000, 8000, 9000000},dx[] = {0, 0, 1, -1, 1, 1, -1, -1},dy[] = {1, -1, 0, 0, 1, -1, 1, -1};
+        int score = 0,centerX = Constant.LEN / 2,centerY = Constant.LEN / 2;
+        for (int i = 0;i < Constant.LEN;++i)
+        {
+            for (int j = 0;j < Constant.LEN;++j)
+            {
+                if (board[i][j] == ' ') continue;
+                int color = board[i][j];
+                int centerBonus = 0,dxCenter = Math.abs(i - centerX),dyCenter = Math.abs(j - centerY);
+                if (dxCenter <= 2 && dyCenter <= 2) centerBonus = 500;
+                else if (dxCenter <= 3 && dyCenter <= 3) centerBonus = 200;
+                else if (dxCenter <= 4 && dyCenter <= 4) centerBonus = 100;
+                for (int dir = 0;dir < 8;++dir)
+                {
+                    int length = 1,x = i + dx[dir],y = j + dy[dir];
+                    while (check_bd(x, y) && board[x][y] == color)
+                    {
+                        ++length;
+                        x += dx[dir];y += dy[dir];
+                    }
+                    x = i - dx[dir];y = j - dy[dir];
+                    while (check_bd(x, y) && board[x][y] == color)
+                    {
+                        ++length;
+                        x -= dx[dir];y -= dy[dir];
+                    }
+                    boolean openEnds = false;
+                    int xf = i + dx[dir],yf = j + dy[dir];
+                    int xb = i - dx[dir],yb = j - dy[dir];
+                    if (check_bd(xf, yf) && board[xf][yf] == ' ' && check_bd(xb, yb) && board[xb][yb] == ' ') openEnds = true;
+                    if (length >= 5 || (length == 4 && openEnds)) return (color == role) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
+                    int multiplier = 1;
+                    if (openEnds)
+
+                    {
+                        switch (length)
+                        {
+                            case 4: multiplier = 200; break; // 冲四
+                            case 3: multiplier = 2000; break; // 活三
+                            case 2: multiplier = 30; break; // 活二
+                        }
+                    }
+                    else
+                    {
+                        switch (length)
+                        {
+                            case 4: multiplier = 30; break; // 眠四
+                            case 3: multiplier = 300; break; // 眠三
+                        }
+                    }
+                    if (color != role && (length == 3 || length == 4)) multiplier *= 10;
+                    score += (color == role ? 1 : -1) * weights[length] * multiplier * (1 + centerBonus);
+                }
+            }
+        } // 极低分，确保AI必须防守
+        System.out.printf ("score:%d\n",score);
+        System.out.printf("-------------------------------------------------------------------------\n");
+        return score;
     }
-    private boolean check_bd (int x,int y,int dx,int dy)
+    private boolean check_bd (int x,int y)
     {
-        if (dx == 1 && x + 1 >= Constant.LEN) return false;
-        if (dy == 1 && y + 1 >= Constant.LEN) return false;
-        if (dx == -1 && x < 1) return false;
-        if (dy == -1 && y < 1) return false;
+        if (x >= Constant.LEN || x < 0) return false;
+        if (y >= Constant.LEN || y < 0) return false;
         return true;
     }
+    /*
     private int solve (int[][] board,int row,int col,int role)
     {
         int ty = board[row][col] == role ? 1 : -1,color = board[row][col];
         double max_value = 0;
+
         int dx[] = {0,0,1,-1,1,1,-1,-1},dy[] = {1,-1,0,0,1,-1,1,-1};
         for (int i = 0;i < 4;++i)
         {
@@ -177,4 +238,5 @@ public class Gomoku
         }
         return (int)max_value * ty;
     }
+     */
 }

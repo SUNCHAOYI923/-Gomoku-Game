@@ -23,6 +23,7 @@ public class PlayAction implements EventHandler<MouseEvent>
     {
         Platform.runLater (() ->  // 确保在 JavaFX 应用线程上执行
         {
+            New_Game.br = true;//时间暂停
             Alert alert = new Alert (Alert.AlertType.CONFIRMATION);
             alert.setTitle ("Gomoku Game");alert.setHeaderText ("Game Over!\n" + s);alert.setContentText ("Restart the game?");
             ButtonType buttonTypeRestart = new ButtonType ("Yes", ButtonBar.ButtonData.YES);
@@ -30,7 +31,7 @@ public class PlayAction implements EventHandler<MouseEvent>
             alert.getButtonTypes ().setAll (buttonTypeRestart, buttonTypeExit);
             alert.showAndWait ().ifPresent (response ->
             {
-                if (response == buttonTypeRestart) {New_Game.br = true;Start.showStartPage ();}
+                if (response == buttonTypeRestart) {Start.showStartPage ();}
                 else if (response == buttonTypeExit) System.exit (0);
             });
         });
@@ -47,38 +48,29 @@ public class PlayAction implements EventHandler<MouseEvent>
         boolean valid = gomoku.play (sx,sy);
         if (valid == false) return ;//不合法无需继续操作
         New_Game.cur_ti = 0;
-        New_Game.white_bar.setProgress (1.0);New_Game.black_bar.setProgress (1.0);
-        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
+        New_Game.white_bar.setProgress (1.0);
+        New_Game.black_bar.setProgress (1.0);
         board.draw_chess (len);
         //write (sx,sy,ty)
         if (gomoku.judge_win (chess,sx,sy,gomoku.getCurrentSide ()))
         {
-            end ((gomoku.getCurrentSide ()).getPlayer() + " wins！");
+            end ((gomoku.getCurrentSide ()).getPlayer () + " wins!");
             return ;
         }
-        gomoku.changeSide ();New_Game.upd_button ();
         if (gomoku.full (chess)) {end ("Draw!");return ;}
-        if (ty != 0 && gomoku.getCurrentSide() != Side.BLACK) AI_play();
+        gomoku.changeSide ();
+        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
+        if (ty != 0 && gomoku.getCurrentSide () != Side.BLACK) AI_play ();
     }
 
     private void ch_end (int sx,int sy)
     {
-        if (gomoku.judge_win (Gomoku.getChess (),sx,sy,gomoku.getCurrentSide ()))
-        {
-            end (gomoku.getCurrentSide ().getPlayer () + " wins！");
-            return;
-        }
-        if (gomoku.full (gomoku.chess))
-        {
-            end ("Draw!");
-            return;
-        }
-        gomoku.changeSide ();
+        if (gomoku.judge_win (Gomoku.getChess (),sx,sy,gomoku.getCurrentSide ())) end (gomoku.getCurrentSide ().getPlayer () + " wins!");
+        if (gomoku.full (gomoku.chess)) end ("Draw!");
     }
 
     private void AI_play ()
     {
-        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         AI_turn = true;
         scheduler.schedule (() ->
         {
@@ -89,7 +81,8 @@ public class PlayAction implements EventHandler<MouseEvent>
                 gomoku.play (nw_sx, nw_sy);
                 board.draw_chess (Constant.sz);
                 ch_end (nw_sx, nw_sy);
-                AI_turn = false;New_Game.upd_button ();
+                AI_turn = false;gomoku.changeSide ();
+                New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
             });
         }, 1, TimeUnit.SECONDS);
     }

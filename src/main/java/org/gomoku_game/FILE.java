@@ -8,12 +8,17 @@ public class FILE
 {
     public static void save_game (Stage nw)
     {
+        New_Game.stop = !New_Game.stop;
         FileChooser fileChooser = new FileChooser ();
         fileChooser.setTitle ("Save Game");
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter ("GOMOKU files (*.gomoku)", "*.gomoku"); //强行要求后缀名为 .gomoku
         fileChooser.getExtensionFilters ().add (extFilter);
         File file = fileChooser.showSaveDialog (nw);
-        if (file == null) return ;
+        if (file == null)
+        {
+            New_Game.stop = !New_Game.stop;
+            return ;
+        }
         if (!file.getPath ().endsWith (".gomoku")) file = new File (file.getPath () + ".gomoku");
         try (ObjectOutputStream output = new ObjectOutputStream (new FileOutputStream (file)))
         {
@@ -33,6 +38,7 @@ public class FILE
             alert.setTitle ("Gomoku Game");alert.setHeaderText (null);alert.setContentText ("Failed to save game.");
             alert.showAndWait ();
         }
+        New_Game.stop = !New_Game.stop;
     }
     public static New_Game.GameState loadGame (Stage nw)
     {
