@@ -124,14 +124,6 @@ public class Gomoku
     }
     private int evaluate (int[][] board, int role)
     {
-        for (int i = 0;i < Constant.LEN;++i)
-        {
-            for (int j = 0;j < Constant.LEN;++j)
-            {
-                System.out.printf ("%d ",board[i][j]);
-            }
-            System.out.printf("\n");
-        }
         int weights[] = {0, 200, 100, 1000, 8000, 9000000},dx[] = {0, 0, 1, -1, 1, 1, -1, -1},dy[] = {1, -1, 0, 0, 1, -1, 1, -1};
         int score = 0,centerX = Constant.LEN / 2,centerY = Constant.LEN / 2;
         for (int i = 0;i < Constant.LEN;++i)

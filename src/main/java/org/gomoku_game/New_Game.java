@@ -123,7 +123,7 @@ public class New_Game extends Application
         Platform.runLater (() ->
         {
             Alert alert = new Alert (Alert.AlertType.INFORMATION);
-            alert.setTitle("Gomoku Game");alert.setHeaderText (null);
+            alert.setTitle ("Gomoku Game");alert.setHeaderText (null);
             alert.setContentText ("The side has been changed due to timeout!");
             alert.showAndWait ();
         });
@@ -292,7 +292,6 @@ public class New_Game extends Application
 
                 }
             }
-
             upd_button ();
         }
     }
