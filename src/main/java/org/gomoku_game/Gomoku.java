@@ -104,7 +104,7 @@ public class Gomoku
             if (dep == 1)
             {
                 int bestIndex = score.indexOf (alpha);
-                rec[1] = dir.get(bestIndex)[0];rec[2] = dir.get(bestIndex)[1];
+                rec[1] = dir.get (bestIndex)[0];rec[2] = dir.get (bestIndex)[1];
             }
             rec[0] = beta;
             return rec;
@@ -122,113 +122,160 @@ public class Gomoku
             return rec;
         }
     }
-    private int evaluate (int[][] board, int role)
+    private int evaluate (int[][] board,int role)
     {
-        int weights[] = {0, 200, 100, 1000, 8000, 9000000},dx[] = {0, 0, 1, -1, 1, 1, -1, -1},dy[] = {1, -1, 0, 0, 1, -1, 1, -1};
-        int score = 0,centerX = Constant.LEN / 2,centerY = Constant.LEN / 2;
+        int score = 0;
         for (int i = 0;i < Constant.LEN;++i)
         {
             for (int j = 0;j < Constant.LEN;++j)
             {
-                if (board[i][j] == ' ') continue;
-                int color = board[i][j];
-                int centerBonus = 0,dxCenter = Math.abs(i - centerX),dyCenter = Math.abs(j - centerY);
-                if (dxCenter <= 2 && dyCenter <= 2) centerBonus = 500;
-                else if (dxCenter <= 3 && dyCenter <= 3) centerBonus = 200;
-                else if (dxCenter <= 4 && dyCenter <= 4) centerBonus = 100;
-                for (int dir = 0;dir < 8;++dir)
+                if (board[i][j] == role)
                 {
-                    int length = 1,x = i + dx[dir],y = j + dy[dir];
-                    while (check_bd(x, y) && board[x][y] == color)
-                    {
-                        ++length;
-                        x += dx[dir];y += dy[dir];
-                    }
-                    x = i - dx[dir];y = j - dy[dir];
-                    while (check_bd(x, y) && board[x][y] == color)
-                    {
-                        ++length;
-                        x -= dx[dir];y -= dy[dir];
-                    }
-                    boolean openEnds = false;
-                    int xf = i + dx[dir],yf = j + dy[dir];
-                    int xb = i - dx[dir],yb = j - dy[dir];
-                    if (check_bd(xf, yf) && board[xf][yf] == ' ' && check_bd(xb, yb) && board[xb][yb] == ' ') openEnds = true;
-                    if (length >= 5 || (length == 4 && openEnds)) return (color == role) ? Integer.MAX_VALUE : Integer.MIN_VALUE;
-                    int multiplier = 1;
-                    if (openEnds)
-
-                    {
-                        switch (length)
-                        {
-                            case 4: multiplier = 200; break; // 冲四
-                            case 3: multiplier = 2000; break; // 活三
-                            case 2: multiplier = 30; break; // 活二
-                        }
-                    }
-                    else
-                    {
-                        switch (length)
-                        {
-                            case 4: multiplier = 30; break; // 眠四
-                            case 3: multiplier = 300; break; // 眠三
-                        }
-                    }
-                    if (color != role && (length == 3 || length == 4)) multiplier *= 10;
-                    score += (color == role ? 1 : -1) * weights[length] * multiplier * (1 + centerBonus);
+                    if (j == 0 || board[i][j - 1] != role) score += eval_dir (board,i,j,0,1,role);
+                    if (i == 0 || board[i - 1][j] != role) score += eval_dir (board,i,j,1,0,role);
+                    if (i == 0 || j == 0 || board[i - 1][j - 1] != role)  score += eval_dir (board,i,j,1,1,role);
+                    if (i == 0 || j == Constant.LEN - 1 || board[i - 1][j + 1] != role) score += eval_dir (board,i,j,1,-1,role);
+                }
+                else if (board[i][j] == (role ^ 1))
+                {
+                    int opp = 0;//对手的威胁
+                    opp += opp_eval (board,i,j,0,1,role ^ 1);
+                    opp += opp_eval (board,i,j,1,0,role ^ 1);
+                    opp += opp_eval (board,i,j,1,1,role ^ 1);
+                    opp += opp_eval (board,i,j,1,-1,role ^ 1);
+                    if (opp >= 10000000) score -= 80000000; //活四/连五
+                    else if (opp >= 1000000) score -= opp * 15;//冲四
+                    else score -= opp * 4.8;
                 }
             }
-        } // 极低分，确保AI必须防守
-        System.out.printf ("score:%d\n",score);
-        System.out.printf("-------------------------------------------------------------------------\n");
+        }
+        score += eval_gap (board,role);score -= eval_gap (board,role ^ 1) * 1.2;
         return score;
     }
-    private boolean check_bd (int x,int y)
+
+    private int eval_gap (int[][] board, int role) //类似 BBXBB 这种
+    {
+        int score = 0;
+        int[][] directions = {{0, 1},{1, 0},{1, 1}, {1, -1}, {0, -1}, {-1, 0}, {-1, -1}, {-1, 1}};
+        for (int i = 0;i < Constant.LEN;++i)
+        {
+            for (int j = 0;j < Constant.LEN;++j)
+            {
+                if (board[i][j] != role) continue;
+                for (int[] dir : directions) score += check_gap (board,i,j,dir[0],dir[1],role);
+            }
+        }
+        return score;
+    }
+
+    // 单方向间隔检测
+    private int check_gap (int[][] board,int x,int y,int dx,int dy,int role)
+    {
+        int score = 0,cnt = 1,gap_cnt = 0,xx = x + dx,yy = y + dy;
+        while (check_bd (xx, yy))
+        {
+            if (board[xx][yy] == role) ++cnt;
+            else if (board[xx][yy] == ' ' && gap_cnt < 1) ++gap_cnt;
+            else break;
+            xx += dx;yy += dy;
+        }
+        xx = x - dx;yy = y - dy;
+        while (check_bd (xx, yy))
+        {
+            if (board[xx][yy] == role) ++cnt;
+            else if (board[xx][yy] == ' ' && gap_cnt < 1) ++gap_cnt;
+            else break;
+            xx -= dx;yy -= dy;
+        }
+        switch (cnt)
+        {
+            case 4:
+                if (gap_cnt == 1) score += 15000;//BBXBB型
+                break;
+            case 3:
+                if (gap_cnt == 1) score += 8000;//BXXBB型
+                break;
+            case 2:
+                if (gap_cnt == 1) score += 2000;//BXB型
+                break;
+        }
+        if (cnt + gap_cnt >= 4) score += 20000;//特殊冲四
+        return score;
+    }
+
+    private int eval_dir (int[][] board,int x,int y,int dx,int dy,int role)
+    {
+        int cnt = 1,xx = x + dx,yy = y + dy;
+        boolean st1 = false,st2 = false;//两个方向
+        while (check_bd (xx, yy) && board[xx][yy] == role) {++cnt;xx += dx;yy += dy;}
+        st1 = !check_bd (xx, yy) || board[xx][yy] != ' ';
+        xx = x - dx;yy = y - dy;
+        while (check_bd (xx, yy) && board[xx][yy] == role) {++cnt;xx -= dx;yy -= dy;}
+        st2 = !check_bd (xx, yy) || board[xx][yy] != ' ';
+        switch (cnt)
+        {
+            case 5: return 50000000; //连五获胜
+            case 4:
+                if (!st2 && !st1) return 10000000;//活四
+                if (!st2 || !st1) return 8000000;//冲四
+                if (st1 || st2) return 20000;//有间隔的
+                break;
+            case 3:
+                if (!st2 && !st1) return 100000;//活三
+                if (!st2 || !st1) return 8000;//眠三
+                break;
+            case 2:
+                if (!st2 && !st1) return 500;//活二
+                if (!st2 || !st1) return 100;//眠二
+                break;
+            case 1:
+                if (!st2 && !st1) return 30;
+                break;
+        }
+        return 0;
+    }
+    private int opp_eval (int[][] board,int x,int y,int dx,int dy,int role)
+    {
+        int val = 0,cnt = 1,xx = x + dx,yy = y + dy;
+        boolean st1 = false,st2 = false;
+        while (check_bd (xx, yy) && board[xx][yy] == role) {++cnt;xx += dx;yy += dy;}
+        st1 = !check_bd (xx, yy) || board[xx][yy] != ' ';
+        xx = x - dx;yy = y - dy;
+        while (check_bd (xx, yy) && board[xx][yy] == role) {++cnt;xx -= dx;yy -= dy;}
+        st2 = !check_bd (xx, yy) || board[xx][yy] != ' ';
+        switch (cnt)
+        {
+            case 4:
+                if (!st1 || !st2) val = 50000000;//对手冲四
+                break;
+            case 3:
+                if (!st1 && !st2) val = 10000000;//对手活三
+                else if (!st1 || !st2) val = 800000;//对手眠三
+                break;
+            case 2:
+                if (!st1 && !st2) val = 1000;//对手活二
+                break;
+            case 1 :
+                if ((!st1 && !st2)) val = 100;
+                break;
+        }
+        if (cnt == 3 && extra (board,x,y,dy,dx,role)) val <<= 1;//双活三
+        return val;
+    }
+
+    private boolean extra (int[][] board,int x,int y,int dx,int dy,int role)
+    {
+        int xx = x + dx,yy = y + dy,cnt = 1;
+        while (check_bd (xx, yy) && board[xx][yy] == role) {++cnt;xx += dx;yy += dy;}
+        xx = x - dx;yy = y - dy;
+        while (check_bd (xx, yy) && board[xx][yy] == role) {++cnt;xx -= dx;yy -= dy;}
+        return cnt >= 3;
+    }
+
+    private boolean check_bd (int x, int y)
     {
         if (x >= Constant.LEN || x < 0) return false;
         if (y >= Constant.LEN || y < 0) return false;
         return true;
     }
-    /*
-    private int solve (int[][] board,int row,int col,int role)
-    {
-        int ty = board[row][col] == role ? 1 : -1,color = board[row][col];
-        double max_value = 0;
-
-        int dx[] = {0,0,1,-1,1,1,-1,-1},dy[] = {1,-1,0,0,1,-1,1,-1};
-        for (int i = 0;i < 4;++i)
-        {
-            int x = row,y = col,o = 2 * i;
-            while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == color) {x += dx[o];y += dy[o];}
-            int dl[] = new int [2],dr[] = new int [2];
-            dl[0] = x;dr[0] = y;
-            x = row;y = col;
-            o ^= 1;
-            while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == color) {x += dx[o];y += dy[o];}
-            dl[1] = x;dr[1] = y;
-            int len = Math.max (Math.abs(dl[0] - dl[1]) + 1,Math.abs (dr[0] - dr[1]) + 1);
-            if (len >= 5) return 10000000 * ty;
-            for (int j = 4;j >= 1;--j)
-            {
-                int leftside = -1,rightside = -1;
-                o = i * 2;
-                while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == ' ') {x += dx[o];y += dy[o];rightside = 0;}
-                o ^= 1;
-                while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == ' ') {x += dx[o];y += dy[o];leftside = 0;}
-                if (leftside != -1)
-                {
-                    o = i * 2;
-                    while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == color) {x += dx[o];y += dy[o];++rightside;}
-                }
-                if (rightside != -1)
-                {
-                    o = i * 2 + 1;
-                    while (check_bd (x,y,dx[o],dy[o]) && board[x + dx[o]][y + dy[o]] == color) {x += dx[o];y += dy[o];++leftside;}
-                }
-                max_value = Math.max(max_value,Math.max(0.0,8000 * Math.min (1.0,1.0 * leftside / (5 - j))) +  Math.max(0.0,8000 * Math.min (1.0,1.0 * rightside / (5 - j))));
-            }
-        }
-        return (int)max_value * ty;
-    }
-     */
 }
