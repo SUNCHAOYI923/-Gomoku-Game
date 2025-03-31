@@ -74,7 +74,7 @@ public class Gomoku
             for (int j = 0;j < Constant.LEN;++j)
                 if (board[i][j] != ' ' && judge_win (board,i,j,board[i][j] == 1 ? Side.WHITE : Side.BLACK))
                 {
-                    rec[0] = 1000000;
+                    rec[0] = evaluate(board,role ^ 1);
                     return rec;
                 }
         if (full (board) || dep == Constant.MAX_DEPTH)
@@ -190,7 +190,7 @@ public class Gomoku
         switch (cnt)
         {
             case 4:
-                if (gap_cnt == 1) score += 15000;//BBXBB型
+                if (gap_cnt == 1) score += 1500000;//BBXBB型
                 break;
             case 3:
                 if (gap_cnt == 1) score += 8000;//BXXBB型
@@ -214,9 +214,9 @@ public class Gomoku
         st2 = !check_bd (xx, yy) || board[xx][yy] != ' ';
         switch (cnt)
         {
-            case 5: return 50000000; //连五获胜
+            case 5: return 80000000; //连五获胜
             case 4:
-                if (!st2 && !st1) return 10000000;//活四
+                if (!st2 && !st1) return 70000000;//活四
                 if (!st2 || !st1) return 8000000;//冲四
                 if (st1 || st2) return 20000;//有间隔的
                 break;

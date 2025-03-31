@@ -135,8 +135,8 @@ public class New_Game extends Application
         container.setPadding (new Insets (10));
         container.setStyle ("-fx-background-color: #ffffcc;");
         container.setPrefWidth (250);
-        HBox controlPanel = new HBox (10);
-        controlPanel.setPadding (new Insets (5));
+        HBox top = new HBox (10),bottom = new HBox (10);
+        top.setPadding (new Insets (5));bottom.setPadding (new Insets (5));
         saveButton = new Button ("Save");
         saveButton.setOnAction (event -> FILE.save_game (nw));
         Button pauseButton = new Button ("Pause");
@@ -145,8 +145,11 @@ public class New_Game extends Application
         undoButton.setOnAction (event -> {undo ();upd_button ();}); // 禁用/启用按钮的切换
         redoButton = new Button ("Redo");
         redoButton.setOnAction (event -> {redo ();upd_button ();});
-        controlPanel.getChildren ().addAll (saveButton,pauseButton,undoButton,redoButton);
-        container.getChildren ().add (controlPanel);
+        Button quitButton = new Button ("Quit");
+        quitButton.setOnAction (event -> {System.exit (0);});
+        top.getChildren ().addAll (saveButton,pauseButton,quitButton);
+        bottom.getChildren ().addAll (undoButton,redoButton);
+        container.getChildren ().add (top);container.getChildren ().add (bottom);
 
         GridPane blackInfoPanel = new GridPane ();
         blackInfoPanel.setVgap (5);
@@ -174,6 +177,7 @@ public class New_Game extends Application
         container.getChildren ().add (whiteInfoPanel);
         return container;
     }
+
     public static void upd_button () {Platform.runLater (() ->
     {
         // AI 在下棋时按钮全面禁用

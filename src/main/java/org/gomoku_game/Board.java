@@ -54,21 +54,6 @@ public class Board extends Pane
             }
         }
     }
-    /*public void drawPreviewChess (double mouseX, double mouseY)
-    {
-        double r = Constant.chess_sz;
-        int row = (int) ((mouseX - Constant.board_del) / r);
-        int col = (int) ((mouseY - Constant.board_del) / r);
-        if (row >= 0 && row < Constant.LEN && col >= 0 && col < Constant.LEN)
-        {
-            double x = Constant.board_del + row * r - r / 2;
-            double y = Constant.board_del + col * r - r / 2;
-            Side currentSide = gomoku.getCurrentSide ();
-            Color color = currentSide == Side.BLACK ? Color.BLACK : Color.WHITE;
-            chessPencil.setFill (color.deriveColor (0, 1, 1, 0.5));
-            chessPencil.fillOval (x, y, r, r);
-        }
-    }*/
 
     public Board (Gomoku gomoku)
     {

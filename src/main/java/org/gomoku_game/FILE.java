@@ -31,13 +31,7 @@ public class FILE
             alert.setTitle ("Gomoku Game");alert.setHeaderText (null);alert.setContentText ("Game saved successfully.");
             alert.showAndWait ();
         }
-        catch (IOException e)
-        {
-            e.printStackTrace ();
-            Alert alert = new Alert (Alert.AlertType.ERROR);
-            alert.setTitle ("Gomoku Game");alert.setHeaderText (null);alert.setContentText ("Failed to save game.");
-            alert.showAndWait ();
-        }
+        catch (IOException e) {e.printStackTrace ();}
         New_Game.stop = !New_Game.stop;
     }
     public static New_Game.GameState loadGame (Stage nw)
