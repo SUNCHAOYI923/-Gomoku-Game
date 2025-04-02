@@ -50,7 +50,7 @@ public class PlayAction implements EventHandler<MouseEvent>
         New_Game.cur_ti = 0;
         New_Game.white_bar.setProgress (1.0);
         New_Game.black_bar.setProgress (1.0);
-        board.draw_chess (len);
+        board.draw_chess (len);New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         //write (sx,sy,ty)
         if (gomoku.judge_win (chess,sx,sy,gomoku.getCurrentSide ()))
         {
@@ -59,7 +59,6 @@ public class PlayAction implements EventHandler<MouseEvent>
         }
         if (gomoku.full (chess)) {end ("Draw!");return ;}
         gomoku.changeSide ();
-        New_Game.upd_st (Gomoku.getChess (),gomoku.getCurrentSide ());
         if (ty != 0 && gomoku.getCurrentSide () != Side.BLACK) AI_play ();
     }
 

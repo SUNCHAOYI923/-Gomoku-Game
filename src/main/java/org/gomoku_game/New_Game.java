@@ -11,11 +11,13 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Stack;
 
+import static java.lang.Math.max;
+
 public class New_Game extends Application
 {
     public static int Black_ti = 0,White_ti = 0;
-    private Label B_ti,W_ti;
-    private int tot = Constant.MAX_TIME,lim = Constant.MAX_SINGLE_TIME;
+    private static Label B_ti,W_ti,B_Moves,W_Moves,B_Max,W_Max;
+    private static int b_cnt = 0,w_cnt = 0,b_mx = 0,w_mx = 0,tot = Constant.MAX_TIME,lim = Constant.MAX_SINGLE_TIME;
     public static int cur_ti = 0;
     public static boolean stop = false;
     public static boolean br = false;
@@ -156,9 +158,14 @@ public class New_Game extends Application
         blackInfoPanel.setPadding (new Insets (5));
         Label blackPlayerInfo = new Label ("Black");
         B_ti = new Label ("Rest time : " + formatTime (tot - Black_ti));
-        blackInfoPanel.add (blackPlayerInfo, 0, 0);
-        blackInfoPanel.add (B_ti, 0, 1);
-        blackInfoPanel.add (black_bar, 0, 2);
+        B_Moves = new Label("Moves: " + b_cnt);
+        B_Max = new Label("Max Lenth: " + b_mx);
+
+        blackInfoPanel.add(blackPlayerInfo, 0, 0);
+        blackInfoPanel.add(B_Moves, 0, 1);
+        blackInfoPanel.add(B_Max, 5, 1);
+        blackInfoPanel.add (B_ti, 0, 2);
+        blackInfoPanel.add (black_bar, 0, 3);
         container.getChildren ().add (blackInfoPanel);
 
         Separator separator = new Separator ();
@@ -171,9 +178,13 @@ public class New_Game extends Application
         whiteInfoPanel.setPadding (new Insets (5));
         Label whitePlayerInfo = new Label ("White");
         W_ti = new Label ("Rest time : " + formatTime (tot - White_ti));
+        W_Moves = new Label("Moves: " + w_cnt);
+        W_Max = new Label("Max Lenth: " + w_mx);
         whiteInfoPanel.add (whitePlayerInfo, 0, 0);
-        whiteInfoPanel.add (W_ti, 0, 1);
-        whiteInfoPanel.add (white_bar, 0, 2);
+        whiteInfoPanel.add (W_Moves, 0, 1);
+        whiteInfoPanel.add (W_Max, 5, 1);
+        whiteInfoPanel.add (W_ti, 0, 2);
+        whiteInfoPanel.add (white_bar, 0, 3);
         container.getChildren ().add (whiteInfoPanel);
         return container;
     }
@@ -184,7 +195,52 @@ public class New_Game extends Application
         undoButton.setDisable (PlayAction.AI_turn || undoStack.size () <= 1);
         redoButton.setDisable (PlayAction.AI_turn || redoStack.empty ());
         saveButton.setDisable (PlayAction.AI_turn);
+        display_info ();
     });}
+
+    private static void display_info() // 双方棋子数量以及最大 lenth
+    {
+        b_cnt = 0;w_cnt = 0;b_mx = 0;w_mx = 0;
+        for (int i = 0;i < Constant.LEN;++i)
+        {
+            for (int j = 0; j < Constant.LEN; ++j)
+            {
+                if (Gomoku.chess[i][j] == 0) {
+                    ++b_cnt;
+                    b_mx = max(b_mx, calc_mx(i, j, 0));
+                }
+                if (Gomoku.chess[i][j] == 1) {
+                    ++w_cnt;
+                    w_mx = max(w_mx, calc_mx(i, j, 1));
+                }
+            }
+        }
+        B_Moves.setText ("Moves: " + b_cnt); B_Max.setText ("Max Length: " + b_mx);
+        W_Moves.setText ("Moves: " + w_cnt); W_Max.setText ("Max Length: " + w_mx);
+    }
+
+    private static int calc_mx (int row,int col,int role)
+    {
+        int cnt = 0,l = col,r = col,board[][] = Gomoku.getChess ();
+        while (l >= 1 && board[row][l - 1] == role) --l;
+        while (r < Constant.LEN - 1 && board[row][r + 1] == role) ++r;
+        cnt = max (cnt,r - l + 1);
+        l = row;r = row;
+        while (l >= 1 && board[l - 1][col] == role) --l;
+        while (r < Constant.LEN - 1 && board[r + 1][col] == role) ++r;
+        cnt = max (cnt,r - l + 1);
+        int x = row,y = col,tmp = 1;
+        while (x >= 1 && y >= 1 && board[x - 1][y - 1] == role) {--x;--y;++tmp;}
+        x = row;y = col;
+        cnt = max (cnt,tmp);
+        while (x < Constant.LEN - 1 && y < Constant.LEN - 1 && board[x + 1][y + 1] == role) {++x;++y;++tmp;}
+        x = row;y = col;tmp = 1;
+        while (x >= 1 && y < Constant.LEN - 1 && board[x - 1][y + 1] == role) {--x;++y;++tmp;}
+        x = row;y = col;
+        while (x < Constant.LEN - 1 && y >= 1 && board[x + 1][y - 1] == role) {++x;--y;++tmp;}
+        cnt = max (cnt,tmp);
+        return cnt;
+    }
 
     private void TIME ()
     {
@@ -233,6 +289,7 @@ public class New_Game extends Application
             });
         }
     }
+
     private String formatTime (int time) {return String.format ("%02d:%02d", time / 60,time % 60);}
 
     private void end (String s)
