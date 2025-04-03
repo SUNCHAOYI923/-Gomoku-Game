@@ -73,7 +73,7 @@ public class New_Game extends Application
 
         Thread timerThread = new Thread (() ->
         {
-            while (!br) // 防止多个计数器同时工作
+            while (!br && Start.ty == 0) // 防止多个计数器同时工作 && AI 模式时候不启动
             {
                 try
                 {
