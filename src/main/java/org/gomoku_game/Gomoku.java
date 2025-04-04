@@ -214,14 +214,14 @@ public class Gomoku
         st2 = !check_bd (xx, yy) || board[xx][yy] != ' ';
         switch (cnt)
         {
-            case 5: return 80000000; //连五获胜
+            case 5: return 1000000000; //连五获胜
             case 4:
-                if (!st2 && !st1) return 70000000;//活四
+                if (!st2 && !st1) return 100000000;//活四
                 if (!st2 || !st1) return 8000000;//冲四
                 if (st1 || st2) return 20000;//有间隔的
                 break;
             case 3:
-                if (!st2 && !st1) return 100000;//活三
+                if (!st2 && !st1) return 3000000;//活三
                 if (!st2 || !st1) return 8000;//眠三
                 break;
             case 2:
@@ -246,11 +246,11 @@ public class Gomoku
         switch (cnt)
         {
             case 4:
-                if (!st1 || !st2) val = 50000000;//对手冲四
+                if (!st1 || !st2) val = 3000000;//对手冲四
                 break;
             case 3:
-                if (!st1 && !st2) val = 10000000;//对手活三
-                else if (!st1 || !st2) val = 800000;//对手眠三
+                if (!st1 && !st2) val = 800000;//对手活三
+                else if (!st1 || !st2) val = 200000;//对手眠三
                 break;
             case 2:
                 if (!st1 && !st2) val = 1000;//对手活二

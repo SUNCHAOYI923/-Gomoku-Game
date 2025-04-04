@@ -22,8 +22,8 @@ public class Start extends Application
         stage.setTitle ("Gomoku Game");
         VBox root = new VBox (20);
         Label titleLabel = new Label ("Welcome to Gomoku Game");
-        Button one = new Button ("Single Player Mode");
-        Button two = new Button ("Two Player Mode");
+        Button one = new Button ("Multiplayer Mode");
+        Button two = new Button ("Single Player Mode");
         Button load = new Button ("Load Game");
         Button quit = new Button ("Quit");
         root.setPadding (new javafx.geometry.Insets (10));
